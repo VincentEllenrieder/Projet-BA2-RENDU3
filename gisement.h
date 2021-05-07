@@ -16,7 +16,6 @@ private:
 	Point centreGisement;
 	double rayonGisement;
 	double capaciteGisement;
-	vector<Gisement> gisements;
 	
 public:
 	Gisement(Point c, double r, double cap) 
@@ -32,13 +31,15 @@ public:
 		double r = rayonGisement;
 		return r;
 	}
-	
-	bool intersect(Gisement otherGisement) const{
-		Point c2 = otherGisement.getCentre();
-		double r2 = otherGisement.getRayon();
-		bool answer = geomod::intersection(centreGisement, c2, rayonGisement, r2);
-		return answer;
+	double getRessource() const{
+		double ressource = capaciteGisement;
+		return ressource;
 	}
+	
+	void gisementIntersectGisement(Gisement& g) const;
 };
 
+namespace gisement {
+	vector<Gisement> getGisements();
+}
 #endif

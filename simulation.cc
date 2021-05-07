@@ -128,16 +128,7 @@ void Simulation::addBase(double x, double y, double ressource) {
 			cout << message::base_superposition(x1, y1, x2, y2);
 			exit(0);
 		}
-	}
-	for(size_t i(0); i < gisements.size(); ++i) {
-		if (newBase.intersectGisement(gisements[i]) == true) {
-			double x1 = (newBase.getCentre()).x;
-			double y1 = (newBase.getCentre()).y;
-			double x2 = (gisements[i].getCentre()).x;
-			double y2 = (gisements[i].getCentre()).y;
-			cout << message::base_field_superposition(x1, y1, x2, y2);
-			exit(0);
-		}
+	newBase.intersectGisement();
 	}
 	bases.push_back(newBase);
 }
@@ -145,18 +136,7 @@ void Simulation::addBase(double x, double y, double ressource) {
 void Simulation::addGisement(double x, double y, double r, double cap) {
 	Point c = geomod::setPoint(x, y);
 	Gisement newGisement(c, r, cap);
-	
-	for(size_t i(0); i < gisements.size(); ++i) {
-		if (gisements[i].intersect(newGisement) == true) {
-			double x1 = (newGisement.getCentre()).x;
-			double y1 = (newGisement.getCentre()).y;
-			double x2 = (gisements[i].getCentre()).x;
-			double y2 = (gisements[i].getCentre()).y;
-			cout << message::field_superposition(x1, y1, x2, y2);
-			exit(0);
-		}
-	}
-	gisements.push_back(newGisement);
+	newGisement.gisementIntersectGisement(newGisement);
 }
 
 

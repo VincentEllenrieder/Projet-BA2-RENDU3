@@ -11,8 +11,9 @@ void Base::addProsp(int newId, double dist, double x, double y, double xb,
 							  
 	Point c = geomod::setPoint(x, y);
 	Point b = geomod::setPoint(xb, yb);
-	shared_ptr<Robot> newPtr(new RobotProspection(newId, c, dist, b, att, ret, fnd));
-		
+	shared_ptr<RobotProspection> newPtr(new RobotProspection(newId, c, dist, b, att,
+															 ret, fnd));
+	
 	for (size_t i(0); i < robots.size(); ++i) {
 		int identification = (robots[i] -> getId()); 
 		if (newId == identification) {	
@@ -20,8 +21,9 @@ void Base::addProsp(int newId, double dist, double x, double y, double xb,
 			exit(0);
 		}
 	}
-	robots.push_back(newPtr);
+	
 	robotsProsp.push_back(newPtr);
+	robots.push_back(newPtr);
 }
 
 void Base::addProsp(int newId, double dist, double x, double y, double xb, 
@@ -30,8 +32,9 @@ void Base::addProsp(int newId, double dist, double x, double y, double xb,
 						
 	Point c = geomod::setPoint(x, y);
 	Point b = geomod::setPoint(xb, yb);
-	shared_ptr<Robot> newPtr(new RobotProspection(newId, c, dist, b, att, ret, fnd, 
-												  xg, yg, rayong, capaciteg));
+	shared_ptr<RobotProspection> newPtr(new RobotProspection(newId, c, dist, b, att, 
+															 ret, fnd, xg, yg, rayong, 
+															 capaciteg));
 	for (size_t i(0); i < robots.size(); ++i) {
 		int identification = (robots[i] -> getId()); 
 		if (newId == identification) {
@@ -48,7 +51,7 @@ void Base::addForage(int newId, double dist, double x, double y, double xb, doub
 				   
 	Point c = geomod::setPoint(x, y);
 	Point b = geomod::setPoint(xb, yb);
-	shared_ptr<Robot> newPtr(new RobotForage(newId, c, dist, b, att));
+	shared_ptr<RobotForage> newPtr(new RobotForage(newId, c, dist, b, att));
 	
 	for (size_t i(0); i < robots.size(); ++i) {
 		int identification = (robots[i] -> getId()); 
@@ -66,7 +69,7 @@ void Base::addTransp(int newId, double dist, double x, double y, double xb, doub
 			   			   
 	Point c = geomod::setPoint(x, y);
 	Point b = geomod::setPoint(xb, yb);
-	shared_ptr<Robot> newPtr(new RobotTransport(newId, c, dist, b, att, ret));
+	shared_ptr<RobotTransport> newPtr(new RobotTransport(newId, c, dist, b, att, ret));
 	
 	for (size_t i(0); i < robots.size(); ++i) {
 		int identification = (robots[i] -> getId()); 
@@ -84,8 +87,8 @@ void Base::addComm(int newId, double dist, double x, double y, double xb, double
    
 	Point c = geomod::setPoint(x, y);
 	Point b = geomod::setPoint(xb, yb);
-	shared_ptr<Robot> newPtr(new RobotForage(newId, c, dist, b, att));
-	
+	shared_ptr<RobotCommunication> newPtr(new RobotCommunication(newId, c, dist, b, 
+																 att));
 	for (size_t i(0); i < robots.size(); ++i) {
 		int identification = (robots[i] -> getId()); 
 		if (newId == identification) {
@@ -98,6 +101,8 @@ void Base::addComm(int newId, double dist, double x, double y, double xb, double
 	if ((x == centreBase.x) and (y == centreBase.y)) Base::setCommAtCenter(true);
 }	
 
+//void creation() {
+	
 
 
 

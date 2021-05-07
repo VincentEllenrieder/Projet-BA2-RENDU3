@@ -62,11 +62,20 @@ public:
 		return answer;
 	}
 	
-	bool intersectGisement(Gisement otherGisement) const {
-		Point c2 = otherGisement.getCentre();
-		double r2 = otherGisement.getRayon();
-		bool answer = geomod::intersection(centreBase, c2, rayon_base, r2);
-		return answer;
+	void intersectGisement() const {
+		vector<Gisement> copieGisements = gisement::getGisements();
+		for (size_t i(0); i < copieGisements.size(); ++i) {
+			Point c2 = copieGisements[i].getCentre();
+			double r2 = copieGisements[i].getRayon();
+			if (geomod::intersection(centreBase, c2, rayon_base, r2) == true) {
+				double x1 = centreBase.x;
+				double y1 = centreBase.y;
+				double x2 = c2.x;
+				double y2 = c2.y;
+				cout << message::base_field_superposition(x1, y1, x2, y2);
+				exit(0);
+			}
+		}
 	}
 	
 	bool arret() {
@@ -99,6 +108,36 @@ public:
 		}
 	}
 	
+	void creationForage() {
+		vector<Point> buts;
+		for (size_t i(0); i < robotsProsp.size(); ++i) {
+			Point but;
+			if (robotsProsp[i] -> getFound() == true) {
+				but = robotsProsp[i]-> getCdng();
+				for (size_t j(0); j < buts.size(); ++j) {
+					if (geomod::samePoint(but,buts[j]) == false) {
+						buts.push_back(but);
+					}
+				}
+			}
+		}
+		double cheminCourt = 3*dim_max;
+		for (size_t k(0); k<buts.size(); ++k) {
+			if (cheminCourt>(geomod::shortestWay(centreBase,buts[k])).norme) {
+				cheminCourt=(geomod::shortestWay(centreBase,buts[k])).norme;
+			}
+		}
+		//addForage();
+	}
+	
+	//void creationProsp(vector<Gisement> gisements) {
+		//for (size_t i(0); i < robotsProsp().size(); ++i) {
+			//robotsProsp[i] -> majProsp;
+		//if (ressourceBase - cout_prosp - cout_forage - cout_transp - cout_com > 500) {
+//	}
+			
+		
+	
 	void addProsp(int id, double dist, double x, double y, double xb, double yb, 
 				  bool att, bool ret, bool fnd);
 	
@@ -114,6 +153,7 @@ public:
 				   			  
 	void addComm(int id, double dist, double x, double y, double xb, double yb, 
 				 bool att);
+	void creation();
 };
 
 

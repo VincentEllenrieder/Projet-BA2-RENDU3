@@ -2,7 +2,9 @@
 
 #include <vector>
 #include <memory>
+#include <cmath>
 #include "gisement.h"
+#include "constantes.h"
 #include "geomod.h"
 
 #ifndef ROBOT_H
@@ -13,7 +15,7 @@ using namespace std;
 class Robot {
 protected:
 	int uid;
-	Point position;
+	Point positionR;
 	double dp;
 	Point but;
 	bool atteint;
@@ -22,7 +24,7 @@ protected:
 	
 public:
 	Robot(int id, Point p, double dist, Point b, bool att)
-	: uid(id), position(p), dp(dist), but(b), atteint(att), connecte(false)
+	: uid(id), positionR(p), dp(dist), but(b), atteint(att), connecte(false)
 	{}
 	
 	int getId() const {
@@ -30,7 +32,7 @@ public:
 		return identification;
 	}
 	Point getPosition() const {
-		Point p = position;
+		Point p = positionR;
 		return p;
 	}
 	vector<shared_ptr<Robot>> getAdjacence() const {
@@ -39,9 +41,19 @@ public:
 	}
 	
 	double getDp() {
-		double Dp(dp);
-		return Dp;
+		double distance(dp);
+		return distance;
 	}
+	
+	void setPosition(Point p) {
+		positionR = p;
+	}
+	
+	void setAtteint(bool a) {
+		atteint = a;
+	}
+	
+	void updatePosition();
 };
 
 class RobotProspection : public Robot {
@@ -74,8 +86,31 @@ public:
 		double m = maxDProsp;
 		return m;
 	}
+	bool getFound() {
+		bool fnd = found;
+		return fnd;
+	}
+	Point getCdng() {
+		Point p = cdng;
+		return p;
+	}
 	void setRetour(bool r) {
 		retour = r;
+	}
+	
+	void updateProsp(vector<Gisement> gisements) {	//à terminer (VIncent)
+		dp += deltaD;
+		updatePosition();
+		for (size_t i(0); i < gisements.size(); ++i) {
+			Point positionG(gisements[i].getCentre());
+			double rayonG = gisements[i].getRayon();
+			if (geomod::belong(positionR, positionG, rayonG) == true) {
+				cdng = positionG;
+				rayong = rayonG;
+				ressourceg = gisements[i].getRessource();
+				found = true;
+			}
+		}
 	}
 };
 
@@ -115,5 +150,6 @@ public:
 	  rayonCom(rayon_com)
 	{}	
 };
+
 
 #endif

@@ -2,8 +2,8 @@
 
 CXX     = g++
 CXXFLAGS = -g -Wall -std=c++11
-CXXFILES = projet.cc simulation.cc base.cc message.cc geomod.cc
-OFILES = projet.o simulation.o base.o message.o geomod.o
+CXXFILES = projet.cc simulation.cc base.cc gisement.cc message.cc geomod.cc
+OFILES = projet.o simulation.o base.o gisement.o message.o geomod.o
 #remplacer la ligne 6 par la ligne 8 en cas de disfonctionnement
 #OFILES = $(CXXFILES:.cc=.o)
 
@@ -35,5 +35,6 @@ projet.o: projet.cc simulation.h gisement.h geomod.h constantes.h \
 simulation.o: simulation.cc simulation.h gisement.h geomod.h constantes.h \
  message.h base.h robot.h
 base.o: base.cc base.h geomod.h constantes.h message.h gisement.h robot.h
+gisement.o: gisement.cc gisement.h geomod.h constantes.h message.h
 message.o: message.cc message.h
-geomod.o: geomod.cc geomod.h
+geomod.o: geomod.cc geomod.h constantes.h

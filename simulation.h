@@ -13,14 +13,9 @@
 class Simulation {
 private:
 	vector<Base> bases;
-	vector<Gisement> gisements;
 	
 public:
 	void addGisement(double x, double y, double r, double cap);
-	
-	vector<Gisement> getGisements() {
-		return gisements;
-	}
 	
 	void addBase(double x, double y, double ressource);
 	
