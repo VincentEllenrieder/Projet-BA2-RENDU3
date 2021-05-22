@@ -35,13 +35,9 @@ void Base::intersectGisement() const {
 }
 
 bool Base::arret() {
-	if (finR > ressourceBase) {
-		fini = false;
-		return fini;
-	} else { 
-		fini = true;
-		return fini;
-	}
+	bool fini = false;
+	if (ressourceBase >= finR) fini = true;
+	return fini;
 }
 
 void Base::updateMoney() {
@@ -55,42 +51,67 @@ void Base::updateMoney() {
 	}
 }
 
+bool Base::destroyBase() {
+	bool destroy = false;
+	if (ressourceBase <= 0) {
+		destroy = true;
+	}
+	return destroy;
+}
+
 //---------------------------Tâche de mise à jour + creation---------------------------
 
 void Base::update() {
 	updateMoney();
-	updateRobots();
 	maintenance();
-	
-	
+	updateRobots();
 }
 
 void Base::creation() {
-	if(robotsProsp.size() < 9) creationProsp();
-	
-	
-	
-
-}
-	
+	amountProduced = 0;
+	if(robots.size() < 18) {
+		for (int i(0); i < 6; ++i) {
+			if (i % 2 == 0) {
+				while ((amountProduced < 3) and (robotsComm.size() < 9)) {
+					creationComm();
+				}
+			} else {
+				while ((amountProduced < 3) and (robotsProsp.size() < 9)) {
+					creationProsp();
+				}
+			}
+		}
+	}
+	while (amountProduced < 3) {
+		creationForageTransport();
+		creationComm();
+	}
+}	
 
 //-----------------------------------Robots globaux------------------------------------
 
 void Base::updateRobots() {
 	for(size_t i(0); i < robotsProsp.size(); ++i) {
-		bool findNew = findNewGisement(robotsProsp[i]);
+		Point g = robotsProsp[i] -> getCdng();
+		bool findNew = findNewGisement(g);
 		Point pos = robotsProsp[i] -> getPosition();
+		double dist = robotsProsp[i] -> getDp();
+		bool back = limiteCarburantProsp(pos, dist);
 		Point newGoal = setNewGoal(pos);
-		robotsProsp[i] -> updateProsp(findNew, newGoal);
+		robotsProsp[i] -> updateProsp(findNew, newGoal, back, centreBase);
 	}
-	for(size_t i(0); i < robotsForage.size(); ++i) { //ajouter updateForage
+	for(size_t i(0); i < robotsForage.size(); ++i) {
 		robotsForage[i] -> updateForage();
 	}
 	for(size_t i(0); i < robotsTransp.size(); ++i) {
 		double bx = (robotsTransp[i] -> getBut()).x;
 		double by = (robotsTransp[i] -> getBut()).y;
 		bool proceed = loadingAccepted(bx, by);
-		robotsTransp[i] -> updateTransp(proceed);
+		Point newBut = newGoal();
+		robotsTransp[i] -> updateTransp(proceed, centreBase, newBut);
+	}
+	for(size_t i(0); i < robotsComm.size(); ++i) {
+		robotsComm[i] -> updateComm();
 	}
 }
 
@@ -103,22 +124,19 @@ int Base::createID() const {
 				break;
 			}
 		if (same == false) return ID;
+		break;
 		}
 	}
+	return 0;
 }
-		
+
+void Base::destroyRobots() {
+	for (size_t i(0); i < robots.size(); ++i) {
+		robots[i].reset();
+	}
+}
 
 //-----------------------------maintenance----------------------------------------
-
-void Base::limiteCarburantProsp() {
-	for (size_t i(0); i < robotsProsp.size(); ++i) {
-		Point position = robotsProsp[i] -> getPosition();
-		if ((maxD_prosp - (geomod::shortestWay(centreBase, position).norme) 
-			- (robotsProsp[i] -> getDp()) - deltaD) <= 0) {
-			robotsProsp[i] -> setRetour(true);
-		}
-	}
-}
 
 void Base::maintenance() {
 	for (size_t i(0); i < robots.size(); ++i) {
@@ -146,9 +164,8 @@ void Base::creationProsp() {
 	}
 }
 
-bool Base::findNewGisement(shared_ptr<RobotProspection>& prospecteur) const {
+bool Base::findNewGisement(Point g) const {
 	bool findNew = false;
-	Point g = prospecteur -> getCdng();
 	int count(0);
 	for (size_t i(0); i < robotsForage.size(); ++i) { 
 		double bx = (robotsForage[i] -> getBut()).x;
@@ -170,21 +187,26 @@ Point Base::setNewGoal(Point pos) {
 	return newBut;
 }
 
+bool Base::limiteCarburantProsp(Point position, double distance) {
+	bool back = false;
+	double calc = maxD_prosp - (geomod::shortestWay(centreBase, position).norme) 
+				  - distance - deltaD;
+	if (calc <= 0) back = true;
+	return back;
+}
 //-------------------------------RobotsForage----------------------------------------		
 
 void Base::creationForageTransport() { 
 	vector<Gisement> foundGisements;
-	if (amountProduced < max_robot) {
-		for (size_t i(0); i < robotsProsp.size(); ++i) {
-			if (robotsProsp[i] -> getFound() == true) {
-				Gisement decouvert(robotsProsp[i] -> getCdng(), 
-								   robotsProsp[i] -> getRg(),
-								   robotsProsp[i] -> getCapg());
-				foundGisements.push_back(decouvert);
-			}
+	for (size_t i(0); i < robotsProsp.size(); ++i) {
+		if (robotsProsp[i] -> getFound() == true) {
+			Gisement decouvert(robotsProsp[i] -> getCdng(), 
+							   robotsProsp[i] -> getRg(),
+							   robotsProsp[i] -> getCapg());
+			foundGisements.push_back(decouvert);
 		}
-		bestForage(foundGisements);
 	}
+	bestForage(foundGisements);
 }	
 
 void Base::bestForage(vector<Gisement> foundGisements) {
@@ -206,9 +228,9 @@ void Base::bestForage(vector<Gisement> foundGisements) {
 			ressourceBase = ressourceBase - cout_forage;
 			++amountProduced;
 		}
-		if (ressourceBase - cout_transp > 0) {
-			addForage(createID(), 0, centreBase.x, centreBase.y, centre.x, centre.y, 
-					  false);
+		if ((ressourceBase - cout_transp > 0) and (amountProduced < max_robot)) {
+			addTransp(createID(), 0, centreBase.x, centreBase.y, centre.x, centre.y, 
+					  false, false);
 			ressourceBase = ressourceBase - cout_transp;
 			++amountProduced;
 		}
@@ -271,10 +293,218 @@ bool Base::loadingAccepted(double butXT, double butYT) {
 	}
 	return proceed; 
 }
-				 
-				 
-				 
-//----------------------ajout robots------------------------------------------
+
+Point Base::newGoal() {
+	for (size_t i(0); i < robotsForage.size(); ++i) {
+		bool incoming = false;
+		Point butF = robotsForage[i] -> getBut();
+		for (size_t j(0); j < robotsTransp. size(); ++j) {
+			Point butT = robotsTransp[j] -> getBut();
+			if((butT.x == butF.x) and (butT.y == butF.y)) {
+				incoming = true;
+				break;
+			}
+		}
+		if (incoming == false) return butF;
+		break;
+	}
+	return centreBase;
+}
+
+//------------------------Robot Communication-----------------------------------------
+		
+void Base::creationComm() {
+	if (amountProduced < max_robot) {
+		Point b = setCommGoal();
+		addComm(createID(), 0, centreBase.x, centreBase.y, b.x, b.y, false);
+		ressourceBase = ressourceBase - cout_com;
+		++amountProduced;
+	}
+}
+
+Point Base::setCommGoal() { //les robots de comm forment 3 carrés pour couvrir toute 
+	Point goal;				// la map : 1 de 9 points, 1 de 16, 1 de 24
+	bool completedOne = squareOneCompleted();
+	bool completedTwo = squareTwoCompleted();
+	bool completedThree = squareThreeCompleted();
+	if (completedOne == false) goal = squareOneGoal();
+	if ((completedTwo == false) and (completedOne == true)) goal = squareTwoGoal();
+	if ((completedThree == false) and (completedTwo == true) 
+		 and (completedOne == true)) goal = squareThreeGoal();
+	return goal;
+}
+
+
+bool Base::squareOneCompleted() {
+	double cX, cY;
+	double m, n;
+	bool completed = false;
+	int count(0);
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + rayon_com * m;
+			cY = centreBase.y + rayon_com * n;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) ++ count;
+			}
+		}
+	}
+	if (count == 9) completed = true;
+	return completed;
+}
+
+bool Base::squareTwoCompleted() {
+	double cX, cY;
+	double m, n;
+	int count(0);
+	bool completed = false;
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + 2 * rayon_com * m;
+			cY = centreBase.y + 2 * rayon_com * n;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) ++ count;
+			}
+		}
+	}
+	if (count == 16) completed = true;
+	return completed;
+}
+
+bool Base::squareThreeCompleted() {
+	double cX, cY;
+	double m, n;
+	int count(0);
+	bool completed = false;
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + 3 * rayon_com * m;
+			cY = centreBase.y + 3 * rayon_com * n;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) ++ count;
+			}
+		}
+	}
+	if (count == 24) completed = true;
+	return completed;
+}
+
+Point Base::squareOneGoal() {
+	double cX, cY;
+	double m, n;
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + rayon_com * m;
+			cY = centreBase.y + rayon_com * n;
+			bool onPosition = false;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) {
+					onPosition = true;
+					break;
+				}
+			}
+			if (onPosition == false) {
+				Point goal = geomod::setPoint(cX, cY);
+				return goal;
+			}
+		}
+	}
+}
+
+Point Base::squareTwoGoal() {
+	double cX, cY;
+	double m, n;
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + 2 * rayon_com * m;
+			cY = centreBase.y + 2 * rayon_com * n;
+			bool onPosition = false;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) {
+					onPosition = true;
+					break;
+				}
+			}
+			if (onPosition == false) {
+				Point goal = geomod::setPoint(cX, cY);
+				return goal;
+			}
+		}
+	}
+}
+
+
+Point Base::squareThreeGoal() {
+	double cX, cY;
+	double m, n;
+	for (int k(0); k < 4; ++k) {
+		if (k == 0) m = 1;
+		if (k == 1) m = 0;
+		if (k == 2) m = -1;
+		for (int l(0); l < 4; ++l) {
+			if (k == 0) n = 1;
+			if (k == 1) n = 0;
+			if (k == 2) n = -1;
+			cX = centreBase.x + 3 * rayon_com * m;
+			cY = centreBase.y + 3 * rayon_com * n;
+			bool onPosition = false;
+			for (size_t i(0); i < robotsComm.size(); ++i) {
+				Point p = geomod::setPoint(cX, cY);
+				Point but  = robotsComm[i] -> getBut();
+				if ((but.x == p.x) and (but.y == p.y)) {
+					onPosition = true;
+					break;
+				}
+			}
+			if (onPosition == false) {
+				Point goal = geomod::setPoint(cX, cY);
+				return goal;
+			}
+		}
+	}
+}
+
+//----------------------------ajout robots------------------------------------------
 
 void Base::addProsp(int newId, double dist, double x, double y, double xb, 
 					double yb, bool att, bool ret, bool fnd) {

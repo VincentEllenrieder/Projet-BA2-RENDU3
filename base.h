@@ -19,7 +19,6 @@ private:
 	Point centreBase;
 	double rayonBase;
 	double ressourceBase;
-	bool fini;
 	bool commAtCenter;
 	vector<shared_ptr<Robot>> robots;
 	vector<shared_ptr<RobotProspection>> robotsProsp;
@@ -29,9 +28,9 @@ private:
 	
 public:
 	Base(Point c, double ress) 
-	: centreBase(c), rayonBase(rayon_base), ressourceBase(ress), fini(arret()), 
-	  commAtCenter(false)
+	: centreBase(c), rayonBase(rayon_base), ressourceBase(ress), commAtCenter(false)
 	{}
+	~Base() {destroyRobots();}
 	
 	bool getCommAtCenter() const {return commAtCenter;}
 	
@@ -53,6 +52,8 @@ public:
 	
 	void updateMoney();
 	
+	bool destroyBase();
+	
 	//-----------------------------------Tâche de mise à jour-------------------------
 	
 	void update();
@@ -65,9 +66,9 @@ public:
 	
 	int createID() const;
 	
-	//-----------------------------maintenance----------------------------------------
+	void destroyRobots();
 	
-	void limiteCarburantProsp();
+	//-----------------------------maintenance----------------------------------------
 	
 	void maintenance();
 	
@@ -75,9 +76,11 @@ public:
 	
 	void creationProsp();
 	
-	bool findNewGisement(shared_ptr<RobotProspection>& prosp) const;
+	bool findNewGisement(Point g) const;
 		
 	Point setNewGoal(Point pos);
+	
+	bool limiteCarburantProsp(Point pos, double distance);
 	
 	//-------------------------------RobotsForage------------------------------------
 	
@@ -90,12 +93,32 @@ public:
 	vector<Gisement> updateInterest(Point centre, 
 									vector<Gisement> interestGisements);
 	
-	void creationForage(Gisement nouveau);
-	
 	//--------------------------------Robots Transport--------------------------------
 	
 	bool loadingAccepted(double butXT, double butYT);
 	
+	bool goalIsBase(double bx, double by);
+	
+	Point newGoal();
+	
+	//--------------------------------Robots Communication---------------------------
+	
+	void creationComm();
+	
+	Point setCommGoal();
+	
+	bool squareOneCompleted();
+	
+	bool squareTwoCompleted();
+	
+	bool squareThreeCompleted();
+	
+	Point squareOneGoal();
+	
+	Point squareTwoGoal();
+	
+	Point squareThreeGoal();
+		
 	//----------------------ajout robots------------------------------------------
 	
 	void addProsp(int id, double dist, double x, double y, double xb, double yb, 

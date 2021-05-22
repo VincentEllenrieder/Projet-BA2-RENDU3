@@ -64,7 +64,12 @@ void Robot::reached() {
 
 //---------------------------Robots Prospection---------------------------------------
 
-void RobotProspection::updateProsp(bool findNew, Point newBut) {
+void RobotProspection::updateProsp(bool findNew, Point newBut, bool back, Point base) {
+	if (back == true) {
+		but = base;
+		atteint = false;
+		found = false;
+	}
 	if ((atteint == false) and (dp != maxDProsp)) {
 		dp += deltaD;
 		updatePosition();
@@ -115,30 +120,56 @@ void RobotForage::updateForage() {
 		updatePosition();
 		reached();
 	}
-	if (atteint == true) atteint = true;
 }
 		
 
 //---------------------------Robots Transport----------------------------------------
 
-void RobotTransport::updateTransp(bool proceed) {
+void RobotTransport::updateTransp(bool proceed, Point base,
+								  Point newBut) {
 	if ((atteint == false) and (dp != maxDTransp)) {
 		dp += deltaD;
 		updatePosition();
 		reached();
 	}
-	if ((atteint == true) and (proceed == true)) {
+	if ((atteint == true) and (proceed == true) and (retour == false)) {
 		updateGisement();
+		but = base;
 		retour = true;
+		atteint = false;
+	}
+	if ((atteint == true) and (retour == true)) {
+		setBut(newBut);
+		atteint = false;
+		if ((newBut.x != base.x) and (newBut.y != base.y)) retour = false;
+	}
+}
 		
 
 void RobotTransport::updateGisement() {
-	
-	
+	vector<Gisement> gisements = gisement::getGisements();
+	for (size_t i(0); i < gisements.size(); ++i) {
+		double ress = gisements[i].getRessource();
+		double gx = gisements[i].getCentreGisement().x;
+		double gy = gisements[i].getCentreGisement().y;
+		if((gx == but.x) and (gy == but.y)) {
+			ress -= deltaR;
+			gisements[i].setRessource(ress);
+			break;
+		}
+	}
+}
+
+//-------------------------------Robot Communication---------------------------------
 
 
-
-
+void RobotCommunication::updateComm() {
+	if ((atteint == false) and (dp != maxDComm)) {
+		dp += deltaD;
+		updatePosition();
+		reached();
+	}
+}
 
 
 

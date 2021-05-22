@@ -91,7 +91,7 @@ public:
 
 	void setRetour(bool r) {retour = r;}
 	
-	void updateProsp(bool findNew, Point newBut);
+	void updateProsp(bool findNew, Point newBut, bool back, Point base);
 	
 	void checkIfFound();
 	
@@ -129,20 +129,22 @@ public:
 	
 	void setRetour(bool a) {retour = a;}
 	
-	void updateTransp(bool proceed);
+	void updateTransp(bool proceed, Point base, Point newBut);
 	
 	void updateGisement();
 };
 
 class RobotCommunication : public Robot {
 private:
-	double coutCom;
-	int maxDCom;
+	double coutComm;
+	int maxDComm;
 	
 public:
 	RobotCommunication(int id, Point p, double dist, Point b, bool att)
-	: Robot(id, p, dist, b, att), coutCom(cout_com), maxDCom(maxD_com)
+	: Robot(id, p, dist, b, att), coutComm(cout_com), maxDComm(maxD_com)
 	{}	
+	
+	void updateComm();
 };
 
 

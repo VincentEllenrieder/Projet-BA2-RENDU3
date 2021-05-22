@@ -15,13 +15,16 @@ private:
 	vector<Base> bases;
 	
 public:
-	void addGisement(double x, double y, double r, double cap);
-	
-	void addBase(double x, double y, double ressource);
+
+	void executeSimulation();
 	
 	void lecture(char* nomFichier);
 	
 	void decodageLigne(string line, ifstream& fichier);
+		
+	void addGisement(double x, double y, double r, double cap);
+	
+	void addBase(double x, double y, double ressource);
 	
 	void commAtCenterBase();
 };

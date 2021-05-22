@@ -18,6 +18,22 @@ namespace {
 					  R_TRANSP, R_COMM};
 }
 
+void Simulation::executeSimulation() {
+	for (int i(0); i >= 0; ++i) {
+		for (size_t k(0); k < bases.size(); ++k) {
+			bool fini = bases[k].arret();
+			if (fini == false) {
+				for (size_t l(0); l < bases.size(); ++l) {
+					//updateVoisin();
+				}
+			bases[k].update();
+			bases[k].creation();
+			if (bases[k].destroyBase() == true) bases[k].~Base();
+			}
+		}
+	}
+}
+
 void Simulation::lecture(char* nomFichier){
     string line;
     ifstream fichier(nomFichier);

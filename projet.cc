@@ -8,8 +8,9 @@ using namespace std;
 int main(int argc, char * argv[]) {
 	if (argc != 2) exit(0);
 	else { 
-		Simulation simulation;
-		simulation.lecture(argv[1]);
+		Simulation goSimulation;
+		goSimulation.lecture(argv[1]);
+		goSimulation.executeSimulation();
 	}
 	
 }

@@ -30,9 +30,9 @@ public:
 	
 	void setCentre(Point c) {centreGisement = c;}
 	
-	void setRayon(double rayon) {rayonGisement=rayon;}
+	void setRayon(double rayon) {rayonGisement = rayon;}
 	
-	void setRessource(double ressource) {capaciteGisement=ressource;}
+	void setRessource(double ressource) {capaciteGisement = ressource;}
 		
 	void gisementIntersectGisement(Gisement& g) const;
 	
