@@ -22,24 +22,24 @@ public:
 	: centreGisement(c), rayonGisement(r), capaciteGisement(cap)
 	{}
 	
-	Point getCentre() const{
-		Point c = centreGisement;
-		return c;
-	}
+	Point getCentreGisement() const {return centreGisement;}
 	
-	double getRayon() const{
-		double r = rayonGisement;
-		return r;
-	}
-	double getRessource() const{
-		double ressource = capaciteGisement;
-		return ressource;
-	}
+	double getRayon() const {return rayonGisement;}
 	
+	double getRessource() const {return capaciteGisement;}
+	
+	void setCentre(Point c) {centreGisement = c;}
+	
+	void setRayon(double rayon) {rayonGisement=rayon;}
+	
+	void setRessource(double ressource) {capaciteGisement=ressource;}
+		
 	void gisementIntersectGisement(Gisement& g) const;
+	
 };
 
 namespace gisement {
-	vector<Gisement> getGisements();
+	vector<Gisement> getGisements ();
 }
+
 #endif

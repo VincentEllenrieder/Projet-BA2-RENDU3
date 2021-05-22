@@ -26,8 +26,7 @@ void Gisement::gisementIntersectGisement(Gisement& g) const {
 }
 
 vector<Gisement> gisement::getGisements() {
-	vector<Gisement> g = gisements;
-	return g;
+	return gisements;
 }
 
 

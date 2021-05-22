@@ -33,110 +33,70 @@ public:
 	  commAtCenter(false)
 	{}
 	
-	void setRessources(double ressources) {
-		ressourceBase = ressources;
-	}
+	bool getCommAtCenter() const {return commAtCenter;}
 	
-	void setCommAtCenter(bool update) {
-		commAtCenter = update;
-	}
+	Point getCentre() const {return centreBase;}
 	
-	bool getCommAtCenter() const{
-		bool thereIs = commAtCenter;
-		return thereIs;
-	}
+	vector<shared_ptr<Robot>> getRobots() const {return robots;}
 	
-	Point getCentre() const {
-		Point c = centreBase;
-		return c;
-	}
+	void setRessources(double ressources) {ressourceBase = ressources;}
 	
-	vector<shared_ptr<Robot>> getRobots() const {
-		vector<shared_ptr<Robot>> liste = robots;
-		return liste;
-	}
+	void setCommAtCenter(bool update) {commAtCenter = update;}
 	
-	bool intersectBase(Base otherBase) const {
-		Point c2 = otherBase.getCentre();
-		bool answer = geomod::intersection(centreBase, c2, rayon_base, rayon_base);
-		return answer;
-	}
+	//---------------------------------Base-------------------------------------------
 	
-	void intersectGisement() const {
-		vector<Gisement> copieGisements = gisement::getGisements();
-		for (size_t i(0); i < copieGisements.size(); ++i) {
-			Point c2 = copieGisements[i].getCentre();
-			double r2 = copieGisements[i].getRayon();
-			if (geomod::intersection(centreBase, c2, rayon_base, r2) == true) {
-				double x1 = centreBase.x;
-				double y1 = centreBase.y;
-				double x2 = c2.x;
-				double y2 = c2.y;
-				cout << message::base_field_superposition(x1, y1, x2, y2);
-				exit(0);
-			}
-		}
-	}
+	bool intersectBase(Base otherBase) const;
 	
-	bool arret() {
-		if (finR > ressourceBase) {
-			fini = false;
-			return fini;
-		} else { 
-			fini = true;
-			return fini;
-		}
-	}
+	void intersectGisement() const;
 	
-	void limiteCarburant() {
-		for (size_t i(0); i < robotsProsp.size(); ++i) {
-			double positionx = robotsProsp[i] -> getPosition().x;
-			double positiony = robotsProsp[i] -> getPosition().y;
-			double distanceMax = robotsProsp[i] -> getMaxDP();
-			if ((distanceMax - sqrt(pow(centreBase.x - positionx, 2)
-			+ pow(centreBase.y-positiony, 2))
-			- (robotsProsp[i] -> getDp()) - deltaD) <= 0) {
-				robotsProsp[i] -> setRetour(true);
-			}
-		}
-	}
+	bool arret();
 	
-	void reparation() {
-		for (size_t i(0); i < robots.size(); ++i) {
-			double c = cout_reparation * (robots[i] -> getDp());
-			ressourceBase = ressourceBase - c;
-		}
-	}
+	void updateMoney();
 	
-	void creationForage() {
-		vector<Point> buts;
-		for (size_t i(0); i < robotsProsp.size(); ++i) {
-			Point but;
-			if (robotsProsp[i] -> getFound() == true) {
-				but = robotsProsp[i]-> getCdng();
-				for (size_t j(0); j < buts.size(); ++j) {
-					if (geomod::samePoint(but,buts[j]) == false) {
-						buts.push_back(but);
-					}
-				}
-			}
-		}
-		double cheminCourt = 3*dim_max;
-		for (size_t k(0); k<buts.size(); ++k) {
-			if (cheminCourt>(geomod::shortestWay(centreBase,buts[k])).norme) {
-				cheminCourt=(geomod::shortestWay(centreBase,buts[k])).norme;
-			}
-		}
-		//addForage();
-	}
+	//-----------------------------------Tâche de mise à jour-------------------------
 	
-	//void creationProsp(vector<Gisement> gisements) {
-		//for (size_t i(0); i < robotsProsp().size(); ++i) {
-			//robotsProsp[i] -> majProsp;
-		//if (ressourceBase - cout_prosp - cout_forage - cout_transp - cout_com > 500) {
-//	}
-			
+	void update();
+	
+	void creation();
+	
+	//-----------------------------------Robots globaux-------------------------------
+	
+	void updateRobots();
+	
+	int createID() const;
+	
+	//-----------------------------maintenance----------------------------------------
+	
+	void limiteCarburantProsp();
+	
+	void maintenance();
+	
+	//-------------------------------Robots Prosp-------------------------------------
+	
+	void creationProsp();
+	
+	bool findNewGisement(shared_ptr<RobotProspection>& prosp) const;
 		
+	Point setNewGoal(Point pos);
+	
+	//-------------------------------RobotsForage------------------------------------
+	
+	void creationForageTransport();
+	
+	void bestForage(vector<Gisement> foundGisements);
+	
+	Point meilleurGisement(vector<Gisement> foundGisements);
+	
+	vector<Gisement> updateInterest(Point centre, 
+									vector<Gisement> interestGisements);
+	
+	void creationForage(Gisement nouveau);
+	
+	//--------------------------------Robots Transport--------------------------------
+	
+	bool loadingAccepted(double butXT, double butYT);
+	
+	//----------------------ajout robots------------------------------------------
 	
 	void addProsp(int id, double dist, double x, double y, double xb, double yb, 
 				  bool att, bool ret, bool fnd);
@@ -153,7 +113,7 @@ public:
 				   			  
 	void addComm(int id, double dist, double x, double y, double xb, double yb, 
 				 bool att);
-	void creation();
+	
 };
 
 

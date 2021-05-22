@@ -13,10 +13,10 @@ using namespace std;
 namespace {
 	int etat;
 	int i(0), total(0), i_r(0), total_r(0), nbP(0), nbF(0), nbT(0), nbC(0);
+	
+	enum EtatLecture {NBG, GISEMENTS, NBB, BASES, R_PROSP, R_FORAGE,
+					  R_TRANSP, R_COMM};
 }
-		 
-enum EtatLecture {NBG, GISEMENTS, NBB, BASES, R_PROSP, R_FORAGE,
-				  R_TRANSP, R_COMM};
 
 void Simulation::lecture(char* nomFichier){
     string line;

@@ -2,7 +2,8 @@
 
 #include <iomanip>
 #include <iostream>
-#include <cmath>				
+#include <cmath>	
+#include <cstdlib>			
 #include "geomod.h"
 
 using namespace std;
@@ -63,7 +64,7 @@ double geomod::normalise(double v) { //normalise une coordonnée
 	
 Vecteur geomod::shortestWay(Point a, Point b){
 	Vecteur v;
-	double shortest(3*maxi+1);
+	double shortest = (3*maxi+1);
 	double xInt;						
 	double yInt;				
 	for (int kx(-1); kx < 2; ++kx) {
@@ -105,7 +106,7 @@ bool geomod::belong(Point a, Point b, double rayon)	{
 
 bool geomod::intersection(Point a, Point b, double r1, double r2){															
 	Vecteur v = geomod::shortestWay(a,b);
-	if (v.norme<r1+r2-epsilon_zero) {
+	if (v.norme < r1 + r2 - epsilon_zero) {
 		return true;
 	}
 	else {

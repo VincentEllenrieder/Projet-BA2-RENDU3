@@ -19,41 +19,40 @@ protected:
 	double dp;
 	Point but;
 	bool atteint;
+	double rayonCom;
 	bool connecte;
 	vector<shared_ptr<Robot>> listeAdjacence;
-	
+
 public:
 	Robot(int id, Point p, double dist, Point b, bool att)
-	: uid(id), positionR(p), dp(dist), but(b), atteint(att), connecte(false)
+	: uid(id), positionR(p), dp(dist), but(b), atteint(att), rayonCom(rayon_com),
+	  connecte(false)
+	  
 	{}
 	
-	int getId() const {
-		int identification = uid;
-		return identification;
-	}
-	Point getPosition() const {
-		Point p = positionR;
-		return p;
-	}
-	vector<shared_ptr<Robot>> getAdjacence() const {
-		vector<shared_ptr<Robot>> liste = listeAdjacence;
-		return liste;
-	}
+	int getId() const {return uid;}
 	
-	double getDp() {
-		double distance(dp);
-		return distance;
-	}
+	Point getPosition() const {return positionR;}
 	
-	void setPosition(Point p) {
-		positionR = p;
-	}
+	vector<shared_ptr<Robot>> getAdjacence() const {return listeAdjacence;}
 	
-	void setAtteint(bool a) {
-		atteint = a;
-	}
+	double getDp() {return dp;}
+	
+	Point getBut() {return but;}
+	
+	bool getAtteint() {return atteint;}
+	
+	void setDp(double dist) {dp = dist;}
+	
+	void setBut(Point b) {but = b;}
+	
+	void setPosition(Point p) {positionR = p;}
+	
+	void setAtteint(bool a) {atteint = a;}
 	
 	void updatePosition();
+	
+	void reached();
 };
 
 class RobotProspection : public Robot {
@@ -69,49 +68,36 @@ private:
 	
 public:
 	RobotProspection(int id, Point p, double dist, Point b, bool att,
-					 bool ret, bool fnd)
+					 bool ret, bool fnd) //sans gisement trouvé
 	: Robot(id, p, dist, b, att), coutProsp(cout_prosp), maxDProsp(maxD_prosp),
 	  retour(ret), found(fnd)
 	{}
 	
 	RobotProspection(int id, Point p, double dist, Point b, bool att,
 					 bool ret, bool fnd, double xg, double yg,
-					 double rayong, double capaciteg)
+					 double rayong, double capaciteg) //gisement trouvé
 	: Robot(id, p, dist, b, att), coutProsp(cout_prosp), maxDProsp(maxD_prosp),
 	  retour(ret), found(fnd), cdng(geomod::setPoint(xg, yg)), rayong(rayong),
 	  ressourceg(capaciteg)
 	{}
+
+	bool getFound() {return found;}
 	
-	double getMaxDP() {
-		double m = maxDProsp;
-		return m;
-	}
-	bool getFound() {
-		bool fnd = found;
-		return fnd;
-	}
-	Point getCdng() {
-		Point p = cdng;
-		return p;
-	}
-	void setRetour(bool r) {
-		retour = r;
-	}
+	Point getCdng() {return cdng;}
+
+	double getRg() {return rayong;}
 	
-	void updateProsp(vector<Gisement> gisements) {	//à terminer (VIncent)
-		dp += deltaD;
-		updatePosition();
-		for (size_t i(0); i < gisements.size(); ++i) {
-			Point positionG(gisements[i].getCentre());
-			double rayonG = gisements[i].getRayon();
-			if (geomod::belong(positionR, positionG, rayonG) == true) {
-				cdng = positionG;
-				rayong = rayonG;
-				ressourceg = gisements[i].getRessource();
-				found = true;
-			}
-		}
-	}
+	double getCapg() {return ressourceg;}
+
+	void setRetour(bool r) {retour = r;}
+	
+	void updateProsp(bool findNew, Point newBut);
+	
+	void checkIfFound();
+	
+	void foundGisement(Point cdnG, double rayonG, double ressourceG);
+	
+	void setNewGoal();
 };
 
 class RobotForage : public Robot {
@@ -123,6 +109,8 @@ public:
 	RobotForage(int id, Point p, double dist, Point b, bool att)
 	: Robot(id, p, dist, b, att), coutForage(cout_forage), maxDForage(maxD_forage)
 	{}	
+	
+	void updateForage();
 }; 
 
 class RobotTransport : public Robot {
@@ -136,18 +124,24 @@ public:
 	: Robot(id, p, dist, b, att), coutTransp(cout_transp), maxDTransp(maxD_transp),
 	  retour(ret)
 	{}	
+	
+	bool getRetour() {return retour;}
+	
+	void setRetour(bool a) {retour = a;}
+	
+	void updateTransp(bool proceed);
+	
+	void updateGisement();
 };
 
 class RobotCommunication : public Robot {
 private:
 	double coutCom;
 	int maxDCom;
-	double rayonCom;
 	
 public:
 	RobotCommunication(int id, Point p, double dist, Point b, bool att)
-	: Robot(id, p, dist, b, att), coutCom(cout_com), maxDCom(maxD_com), 
-	  rayonCom(rayon_com)
+	: Robot(id, p, dist, b, att), coutCom(cout_com), maxDCom(maxD_com)
 	{}	
 };
 
