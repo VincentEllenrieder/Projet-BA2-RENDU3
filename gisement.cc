@@ -11,7 +11,7 @@ namespace {
 
 void Gisement::gisementIntersectGisement(Gisement& g) const {
 	for (size_t i(0); i < gisements.size(); ++i) {
-		Point c2 = gisements[i].getCentre();
+		Point c2 = gisements[i].getCentreGisement();
 		double r2 = gisements[i].getRayon();
 		if (geomod::intersection(centreGisement, c2, rayonGisement, r2) == true) {
 			double x1 = centreGisement.x;
@@ -29,4 +29,7 @@ vector<Gisement> gisement::getGisements() {
 	return gisements;
 }
 
+void gisement::destroyGisements() {
+	gisements.clear();
+}
 

@@ -19,15 +19,14 @@ protected:
 	double dp;
 	Point but;
 	bool atteint;
-	double rayonCom;
-	bool connecte;
+	bool visited;
+	bool remote;
 	vector<shared_ptr<Robot>> listeAdjacence;
 
 public:
 	Robot(int id, Point p, double dist, Point b, bool att)
-	: uid(id), positionR(p), dp(dist), but(b), atteint(att), rayonCom(rayon_com),
-	  connecte(false)
-	  
+	: uid(id), positionR(p), dp(dist), but(b), atteint(att), visited(false), 
+	  remote(false)
 	{}
 	
 	int getId() const {return uid;}
@@ -42,13 +41,23 @@ public:
 	
 	bool getAtteint() {return atteint;}
 	
+	bool getVisited() {return visited;}
+	
+	bool getRemote() {return remote;}
+	
 	void setDp(double dist) {dp = dist;}
 	
 	void setBut(Point b) {but = b;}
 	
 	void setPosition(Point p) {positionR = p;}
 	
-	void setAtteint(bool a) {atteint = a;}
+	void setAtteint(bool b) {atteint = b;}
+	
+	void setVisited(bool b) {visited = b;}
+	
+	void setRemote(bool b) {remote = b;}
+	
+	void setAdjacence(vector<shared_ptr<Robot>>& liste) {listeAdjacence = liste;}
 	
 	void updatePosition();
 	
@@ -91,7 +100,9 @@ public:
 
 	void setRetour(bool r) {retour = r;}
 	
-	void updateProsp(bool findNew, Point newBut, bool back, Point base);
+	void updateProspRemote(bool findNew, Point newBut, bool back, Point base);
+	
+	void updateProspAuto(Point base);
 	
 	void checkIfFound();
 	
@@ -129,7 +140,9 @@ public:
 	
 	void setRetour(bool a) {retour = a;}
 	
-	void updateTransp(bool proceed, Point base, Point newBut);
+	void updateTranspRemote(bool proceed, Point base, Point newBut);
+	
+	void updateTranspAuto(Point base);
 	
 	void updateGisement();
 };

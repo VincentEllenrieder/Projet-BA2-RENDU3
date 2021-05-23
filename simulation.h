@@ -27,9 +27,14 @@ public:
 	void addBase(double x, double y, double ressource);
 	
 	void commAtCenterBase();
+	
+	void end(ifstream& fichier);
+	
+	void destroyData();
 };
 
 namespace simulation{
+	void setWolrd();
 	void etatApresNBG(ifstream& fichier);
 	void etatApresGisement(ifstream& fichier);
 	void etatApresNBB(ifstream& fichier);
@@ -38,7 +43,6 @@ namespace simulation{
 	void etatApresForage(ifstream& fichier);
 	void etatApresTransp(ifstream& fichier);
 	void etatApresComm(ifstream& fichier);
-	void end(ifstream& fichier);
 	void successfullRead(ifstream& fichier);
 	bool convertStringToBool(string& str);
 }

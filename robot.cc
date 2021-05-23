@@ -62,28 +62,37 @@ void Robot::reached() {
 	if (pointReached == true) atteint = true;
 }
 
+	
+
 //---------------------------Robots Prospection---------------------------------------
 
-void RobotProspection::updateProsp(bool findNew, Point newBut, bool back, Point base) {
-	if (back == true) {
+void RobotProspection::updateProspRemote(bool findNew, Point newBut, bool back, 
+										 Point base) {
+	if (back == true) { //besoin de maintenance
+		retour = true;
 		but = base;
 		atteint = false;
-		found = false;
 	}
-	if ((atteint == false) and (dp != maxDProsp)) {
+	if ((atteint == false) and (dp != maxDProsp)) { //avance
 		dp += deltaD;
 		updatePosition();
 		reached();
 	}
+	if ((but.x = base.x) and (but.y == base.y) and (atteint == true)) { //arrivée à 
+		but = newBut;													//Base
+		retour = false;
+		atteint = false;
+		found = false;
+	}
 	checkIfFound();
-	if ((found == false) and (atteint == true)) {
-		setBut(newBut);
+	if ((found == false) and (atteint == true)) { //but atteint mais pas de gisement
+		but = newBut;
 		atteint = false;
 	}
-	if ((found == true) and (findNew == true)) {
-		found = false;
+	if ((found == true) and (findNew == true) and (retour == false)) { //3 foreurs en
+		found = false;												   //en route
 		atteint = false;
-		setBut(newBut);
+		but = newBut;
 	}
 }
 
@@ -111,6 +120,19 @@ void RobotProspection::foundGisement(Point cdng, double rayonG, double ressource
 	atteint = true;
 }
 
+void RobotProspection::updateProspAuto(Point base) {
+	if ((atteint == false) and (dp != maxDProsp)) {
+		dp += deltaD;
+		updatePosition();
+		reached();
+	}
+	checkIfFound();
+	if (atteint == true) {
+		retour = true;
+		but = base;
+	}
+}
+
 	
 //---------------------------Robots Forage---------------------------------------
 
@@ -125,23 +147,23 @@ void RobotForage::updateForage() {
 
 //---------------------------Robots Transport----------------------------------------
 
-void RobotTransport::updateTransp(bool proceed, Point base,
-								  Point newBut) {
-	if ((atteint == false) and (dp != maxDTransp)) {
+void RobotTransport::updateTranspRemote(bool proceed, Point base,
+										Point newBut) {
+	if ((atteint == false) and (dp != maxDTransp)) { //avance
 		dp += deltaD;
 		updatePosition();
 		reached();
 	}
-	if ((atteint == true) and (proceed == true) and (retour == false)) {
-		updateGisement();
-		but = base;
-		retour = true;
+	if ((atteint == true) and (proceed == true) and (retour == false)) {//arrivée au 
+		updateGisement();												//gisement et
+		but = base;														//depart pour
+		retour = true;													//base
 		atteint = false;
 	}
-	if ((atteint == true) and (retour == true)) {
-		setBut(newBut);
+	if ((atteint == true) and (retour == true)) { //arrivée à la base et depart pour
+		but = newBut;							  //nouveau but
 		atteint = false;
-		if ((newBut.x != base.x) and (newBut.y != base.y)) retour = false;
+		retour = false;
 	}
 }
 		
@@ -157,6 +179,18 @@ void RobotTransport::updateGisement() {
 			gisements[i].setRessource(ress);
 			break;
 		}
+	}
+}
+
+void RobotTransport::updateTranspAuto(Point base) {
+	if ((atteint == false) and (dp != maxDTransp)) {
+		dp += deltaD;
+		updatePosition();
+		reached();
+	}
+	if (atteint == true) {
+		retour = true;
+		but = base;
 	}
 }
 

@@ -28,10 +28,6 @@ public:
 	
 	double getRessource() const {return capaciteGisement;}
 	
-	void setCentre(Point c) {centreGisement = c;}
-	
-	void setRayon(double rayon) {rayonGisement = rayon;}
-	
 	void setRessource(double ressource) {capaciteGisement = ressource;}
 		
 	void gisementIntersectGisement(Gisement& g) const;
@@ -40,6 +36,7 @@ public:
 
 namespace gisement {
 	vector<Gisement> getGisements ();
+	void destroyGisements();
 }
 
 #endif

@@ -9,6 +9,7 @@ int main(int argc, char * argv[]) {
 	if (argc != 2) exit(0);
 	else { 
 		Simulation goSimulation;
+		simulation::setWolrd();
 		goSimulation.lecture(argv[1]);
 		goSimulation.executeSimulation();
 	}

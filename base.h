@@ -56,21 +56,30 @@ public:
 	
 	//-----------------------------------Tâche de mise à jour-------------------------
 	
-	void update();
+	void updateRemote();
+	
+	void updateAutonomous();
+	
+	void maintenance();
 	
 	void creation();
 	
-	//-----------------------------------Robots globaux-------------------------------
+	//---------------------------------Connexion--------------------------------------
 	
-	void updateRobots();
+	void updateAdjacence(vector<shared_ptr<Robot>> robots1, 
+						 vector<shared_ptr<Robot>> robots2);
+						 
+	void connexion();
+	
+	vector<shared_ptr<Robot>> parcoursDFS(shared_ptr<Robot> depart);
+	
+	void recDFS(vector<shared_ptr<Robot>>& result, shared_ptr<Robot> prochain);
+	
+	//-----------------------------------Robots globaux-------------------------------
 	
 	int createID() const;
 	
 	void destroyRobots();
-	
-	//-----------------------------maintenance----------------------------------------
-	
-	void maintenance();
 	
 	//-------------------------------Robots Prosp-------------------------------------
 	

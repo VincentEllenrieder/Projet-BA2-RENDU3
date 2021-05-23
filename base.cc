@@ -41,12 +41,13 @@ bool Base::arret() {
 }
 
 void Base::updateMoney() {
-	for(size_t i(0); i < robotsTransp.size(); ++i) {
+	for (size_t i(0); i < robotsTransp.size(); ++i) {
 		Point pos = robotsTransp[i] -> getPosition();
 		bool retour = robotsTransp[i] -> getRetour();
 		bool inside = geomod::belong(centreBase, pos, rayonBase);
 		if ((inside == true) and (retour == true)) {
 			ressourceBase += deltaR;
+			robotsTransp[i] -> setRetour(false);
 		}
 	}
 }
@@ -57,19 +58,25 @@ bool Base::destroyBase() {
 		destroy = true;
 	}
 	return destroy;
-}
+}	
 
-//---------------------------Tâche de mise à jour + creation---------------------------
+//---------------------------Creation + Tâche de mise à jour---------------------------
 
-void Base::update() {
-	updateMoney();
-	maintenance();
-	updateRobots();
-}
+void Base::maintenance() {
+	for (size_t i(0); i < robots.size(); ++i) {
+		double dist = robots[i] -> getDp();
+		Point pos = robots[i] -> getPosition();
+		if ((geomod::belong(centreBase, pos, rayonBase)) == true) {
+			double c = cout_reparation * dist;
+			ressourceBase -= c;
+			robots[i] -> setDp(0);
+		}
+	}
+}	
 
 void Base::creation() {
 	amountProduced = 0;
-	if(robots.size() < 18) {
+	if (robots.size() < 18) {
 		for (int i(0); i < 6; ++i) {
 			if (i % 2 == 0) {
 				while ((amountProduced < 3) and (robotsComm.size() < 9)) {
@@ -88,32 +95,129 @@ void Base::creation() {
 	}
 }	
 
-//-----------------------------------Robots globaux------------------------------------
-
-void Base::updateRobots() {
-	for(size_t i(0); i < robotsProsp.size(); ++i) {
-		Point g = robotsProsp[i] -> getCdng();
-		bool findNew = findNewGisement(g);
-		Point pos = robotsProsp[i] -> getPosition();
-		double dist = robotsProsp[i] -> getDp();
-		bool back = limiteCarburantProsp(pos, dist);
-		Point newGoal = setNewGoal(pos);
-		robotsProsp[i] -> updateProsp(findNew, newGoal, back, centreBase);
+void Base::updateRemote() {
+	for (size_t i(0); i < robotsProsp.size(); ++i) {
+		if (robotsProsp[i] -> getRemote() == true) {
+			bool findNew;
+			if (robotsProsp[i] -> getFound() == true) {
+				Point g = robotsProsp[i] -> getCdng();
+				findNew = findNewGisement(g);
+			}
+			Point pos = robotsProsp[i] -> getPosition();
+			double dist = robotsProsp[i] -> getDp();
+			bool back = limiteCarburantProsp(pos, dist);
+			Point newGoal = setNewGoal(pos);
+			robotsProsp[i] -> updateProspRemote(findNew, newGoal, back, centreBase);
+		}
 	}
-	for(size_t i(0); i < robotsForage.size(); ++i) {
+	for (size_t i(0); i < robotsForage.size(); ++i) {
 		robotsForage[i] -> updateForage();
 	}
-	for(size_t i(0); i < robotsTransp.size(); ++i) {
-		double bx = (robotsTransp[i] -> getBut()).x;
-		double by = (robotsTransp[i] -> getBut()).y;
-		bool proceed = loadingAccepted(bx, by);
-		Point newBut = newGoal();
-		robotsTransp[i] -> updateTransp(proceed, centreBase, newBut);
+	for (size_t i(0); i < robotsTransp.size(); ++i) {
+		if (robotsTransp[i] -> getRemote() == true) {
+			double bx = (robotsTransp[i] -> getBut()).x;
+			double by = (robotsTransp[i] -> getBut()).y;
+			bool proceed = loadingAccepted(bx, by);
+			Point newBut = newGoal();
+			robotsTransp[i] -> updateTranspRemote(proceed, centreBase, newBut);
+		}
 	}
-	for(size_t i(0); i < robotsComm.size(); ++i) {
+	for (size_t i(0); i < robotsComm.size(); ++i) {
 		robotsComm[i] -> updateComm();
 	}
 }
+
+void Base::updateAutonomous() {
+	for (size_t i(0); i < robotsProsp.size(); ++i) {
+		if (robotsProsp[i] -> getRemote() == false) {
+			robotsProsp[i] -> updateProspAuto(centreBase);
+		}
+	}
+	for (size_t i(0); i < robotsTransp.size(); ++i) {
+		if (robotsTransp[i] -> getRemote() == false) {
+			robotsTransp[i] -> updateTranspAuto(centreBase);
+		}
+	}
+}
+
+//-----------------------------------Connexion---------------------------------------
+
+
+void Base::updateAdjacence(vector<shared_ptr<Robot>> robots1, 
+						   vector<shared_ptr<Robot>> robots2) {
+	for (size_t i(0); i < robots1.size(); ++i) { 
+		vector<shared_ptr<Robot>> adjacence = robots1[i] -> getAdjacence();
+		adjacence.clear();
+		int id1 = robots1[i] -> getId();
+		Point position1 = robots1[i] -> getPosition();
+		
+		for (size_t j(0); j < robots1.size(); ++j) { 
+			int id2 = robots1[j] -> getId();
+			if (id1 == id2) continue;
+			Point position2 = robots1[j] -> getPosition();
+			double distance = (geomod::shortestWay(position1, position2)).norme;
+			if(distance <= rayon_com) {
+				adjacence.push_back(robots1[j]);
+			}
+		}
+		// si temps : remplacer void par bool pour retourner un booleen disant si
+		// ce graphe est relié à des robots d'autres bases
+		//for(size_t j(0); j < robots2.size(); ++j) { 	
+			//Point position2 = robots2[j] -> getPosition();
+			//double distance = geomod::shortestWay(position1, position2);
+			//if(distance <= rayon_com) {
+			//	adjacence.push_back(robots1[j]);
+			//}
+		//}
+		robots1[i] -> setAdjacence(adjacence);
+	}
+}
+
+void Base::connexion() {
+	shared_ptr<Robot> robotCentral;
+	for (size_t i(0); i < robots.size(); ++i) {
+		Point position = robots[i] -> getPosition();
+		if ((position.x == centreBase.x) and (position.y == centreBase.y)) {
+			robotCentral = robots[i];
+			break;
+		}
+	}
+	vector<shared_ptr<Robot>> connectedToBase = parcoursDFS(robotCentral);
+	
+	for (size_t i(0); i < robots.size(); ++i) {
+		robots[i] -> setRemote(false);
+		int id1 = robots[i] -> getId();
+		for (size_t j(0); j < connectedToBase.size(); ++j) {
+			int id2 = connectedToBase[j] -> getId();
+			if (id1 == id2) robots[i] -> setRemote(true);
+		}
+	}
+}
+			
+vector<shared_ptr<Robot>> Base::parcoursDFS(shared_ptr<Robot> depart) {
+	
+	vector<shared_ptr<Robot>> result;
+	for (auto p : robots) p -> setVisited(false);
+	
+	recDFS(result, depart);
+	return result;
+}
+
+void Base::recDFS(vector<shared_ptr<Robot>>& result, shared_ptr<Robot> prochain) {
+	
+	prochain -> setVisited(true);
+	result.push_back(prochain);
+	
+	const vector<shared_ptr<Robot>> adjacence = prochain -> getAdjacence();
+	for(size_t i(0); i < adjacence.size(); ++i) {
+		bool controled = adjacence[i] -> getVisited();
+		if (controled == false) recDFS(result, adjacence[i]);
+	}
+}
+	
+	
+
+//-----------------------------------Robots globaux------------------------------------
 
 int Base::createID() const {
 	bool same = false;
@@ -134,21 +238,24 @@ void Base::destroyRobots() {
 	for (size_t i(0); i < robots.size(); ++i) {
 		robots[i].reset();
 	}
-}
-
-//-----------------------------maintenance----------------------------------------
-
-void Base::maintenance() {
-	for (size_t i(0); i < robots.size(); ++i) {
-		double dist = robots[i] -> getDp();
-		Point pos = robots[i] -> getPosition();
-		if ((geomod::belong(centreBase, pos, rayonBase)) == true) {
-			double c = cout_reparation * dist;
-			ressourceBase -= c;
-			robots[i] -> setDp(0);
-		}
+	robots.clear();
+	for (size_t i(0); i < robotsProsp.size(); ++i) {
+		robotsProsp[i].reset();
 	}
-}		
+	robotsProsp.clear();
+	for (size_t i(0); i < robotsForage.size(); ++i) {
+		robotsForage[i].reset();
+	}
+	robotsForage.clear();
+	for (size_t i(0); i < robotsTransp.size(); ++i) {
+		robotsTransp[i].reset();
+	}
+	robotsTransp.clear();
+	for (size_t i(0); i < robotsComm.size(); ++i) {
+		robotsComm[i].reset();
+	}
+	robotsComm.clear();
+}
 
 //-------------------------------Robots Prosp----------------------------------------
 
