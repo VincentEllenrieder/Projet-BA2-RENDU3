@@ -15,7 +15,6 @@ int main(int argc, char * argv[]) {
 		goSimulation.lecture(argv[1]);
 		goSimulation.executeSimulation();
 	}
-	
 }
  
 	

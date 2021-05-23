@@ -181,7 +181,7 @@ void Base::maintenance() {
 
 void Base::creation() {
 	amountProduced = 0;
-	if (robots.size() < 18) {
+	if ((robotsProsp.size() < 9) or (robotsComm.size() < 9)) {
 		for (int i(0); i < 6; ++i) {
 			if (i % 2 == 0) {
 				while ((amountProduced < 3) and (robotsComm.size() < 9)) {
@@ -252,6 +252,9 @@ void Base::updateAdjacence(vector<shared_ptr<Robot>> robots1,
 						   vector<shared_ptr<Robot>> robots2) {
 	for (size_t i(0); i < robots1.size(); ++i) { 
 		vector<shared_ptr<Robot>> adjacence = robots1[i] -> getAdjacence();
+		for (size_t j(0); i < adjacence.size(); ++j) {  
+			adjacence[i].reset();
+		}
 		adjacence.clear();
 		int id1 = robots1[i] -> getId();
 		Point position1 = robots1[i] -> getPosition();
@@ -319,8 +322,6 @@ void Base::recDFS(vector<shared_ptr<Robot>>& result, shared_ptr<Robot> prochain)
 		if (controled == false) recDFS(result, adjacence[i]);
 	}
 }
-	
-	
 
 //-----------------------------------Robots globaux------------------------------------
 
