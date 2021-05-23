@@ -6,8 +6,10 @@
 using namespace std;
 
 int main(int argc, char * argv[]) {
-	if (argc != 2) exit(0);
-	else { 
+	if (argc == 1) {
+		
+	}
+	if (argc == 2) { 
 		Simulation goSimulation;
 		simulation::setWolrd();
 		goSimulation.lecture(argv[1]);

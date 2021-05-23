@@ -89,6 +89,8 @@ public:
 	  retour(ret), found(fnd), cdng(geomod::setPoint(xg, yg)), rayong(rayong),
 	  ressourceg(capaciteg)
 	{}
+	
+	bool getRetour() {return retour;}
 
 	bool getFound() {return found;}
 	

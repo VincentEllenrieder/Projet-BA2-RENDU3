@@ -18,6 +18,8 @@ public:
 
 	void executeSimulation();
 	
+	void ecriture(ofstream& sortie);
+	
 	void lecture(char* nomFichier);
 	
 	void decodageLigne(string line, ifstream& fichier);

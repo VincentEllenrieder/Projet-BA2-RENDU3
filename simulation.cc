@@ -171,6 +171,29 @@ void Simulation::commAtCenterBase() {
 	}
 }
 
+void Simulation::ecriture(ofstream& sortie) {
+		
+	sortie << "# Gisements" << endl;
+	vector<Gisement> gisements = gisement::getGisements();
+	unsigned nbG = gisements.size();
+	sortie << nbG << endl;
+	for(size_t i(0); i < gisements.size(); ++i) {
+		double xG = (gisements[i].getCentreGisement()).x;
+		double yG = (gisements[i].getCentreGisement()).y;
+		double rG = gisements[i].getRayon();
+		double ressG = gisements[i].getRessource();
+		sortie << "		" << xG << " " << yG << " " << rG << " " << ressG << endl;
+	}
+	sortie << endl;
+	
+	sortie << "# Bases" << endl;
+	unsigned int nbB = bases.size();
+	sortie << nbB << endl;
+	for(size_t i(0); i < bases.size(); ++i) { 
+		bases[i].ecritureBase(sortie);
+	}
+}
+
 void Simulation::end(ifstream& fichier) {
 	fichier.close();
 	destroyData();

@@ -54,6 +54,18 @@ public:
 	
 	bool destroyBase();
 	
+	//---------------------------------Ecriture----------------------------------------
+	
+	void ecritureBase(ofstream& sortie);
+	
+	void ecritureProsp(shared_ptr<RobotProspection>& prospecteur, ofstream& sortie);
+	
+	void ecritureForage(shared_ptr<RobotForage>& foreur, ofstream& sortie);
+	
+	void ecritureTransp(shared_ptr<RobotTransport>& transporteur, ofstream& sortie);
+	
+	void ecritureComm(shared_ptr<RobotCommunication>& communicateur, ofstream& sortie);
+	
 	//-----------------------------------Tâche de mise à jour-------------------------
 	
 	void updateRemote();

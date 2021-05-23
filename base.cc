@@ -2,6 +2,9 @@
 
 #include <iomanip>	
 #include <iostream>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "base.h"
 
 using namespace std;
@@ -58,7 +61,109 @@ bool Base::destroyBase() {
 		destroy = true;
 	}
 	return destroy;
+}
+
+//------------------------------------Ecriture----------------------------------------
+
+void Base::ecritureBase(ofstream& sortie) {
+	double xB = centreBase.x;
+	double yB = centreBase.y;
+	double ressB = ressourceBase;
+	unsigned P = robotsProsp.size();
+	unsigned F = robotsForage.size();
+	unsigned T = robotsTransp.size();
+	unsigned C = robotsComm.size();
+	sortie << "		" << xB << " " << yB << " " << ressB << " " << P << " "
+		   << F << " " << T << " " << C << endl;
+	for(size_t i(0); i < robotsProsp.size(); ++i) { 
+		ecritureProsp(robotsProsp[i], sortie);
+		sortie << endl;
+	}
+	for(size_t i(0); i < robotsForage.size(); ++i) { 
+		ecritureForage(robotsForage[i], sortie);
+		sortie << endl;
+	}
+	for(size_t i(0); i < robotsTransp.size(); ++i) { 
+		ecritureTransp(robotsTransp[i], sortie);
+		sortie << endl;
+	}
+	for(size_t i(0); i < robotsComm.size(); ++i) { 
+		ecritureComm(robotsComm[i], sortie);
+		sortie << endl;
+	}
 }	
+
+void Base::ecritureProsp(shared_ptr<RobotProspection>& prospecteur, ofstream& sortie) {
+			
+	double id = prospecteur -> getId();
+	double distance = prospecteur -> getDp();
+	double x = (prospecteur -> getPosition()).x;
+	double y = (prospecteur -> getPosition()).y;
+	double xBut = (prospecteur -> getBut()).x;
+	double yBut = (prospecteur -> getBut()).y;
+	bool att = prospecteur -> getAtteint();
+	bool ret = prospecteur -> getRetour();
+	bool fnd = prospecteur -> getFound();
+	if (fnd == true) {
+		double xG = (prospecteur -> getCdng()).x;
+		double yG = (prospecteur -> getCdng()).y;
+		double rayonG = prospecteur -> getRg();
+		double ressG = prospecteur -> getCapg();
+		sortie << "				" << "# Prospecteurs" << endl;
+		sortie << " 			" << id << " " << distance << " " << x << " " 
+			   << y << " " << xBut << " " << yBut  << " " << att << " " << ret
+			   << " " << fnd << " " << xG << " " << yG << " " << rayonG << " " 
+			   << ressG << endl;
+	} else {
+		sortie << "				" << "# Prospecteurs" << endl;
+		sortie << " 			" << id << " " << distance << " " << x << " " 
+			   << y << " " << xBut << " " << yBut  << " " << att << " " << ret
+			   << " " << fnd << endl;	
+	}
+}
+
+void Base::ecritureForage(shared_ptr<RobotForage>& foreur, ofstream& sortie) {
+	
+	double id = foreur -> getId();
+	double distance = foreur -> getDp();
+	double x = (foreur -> getPosition()).x;
+	double y = (foreur -> getPosition()).y;
+	double xBut = (foreur -> getBut()).x;
+	double yBut = (foreur -> getBut()).y;
+	bool att = foreur -> getAtteint();
+	sortie << "				" << "# Foreurs" << endl;
+	sortie << " 			" << id << " " << distance << " " << x << " " 
+		   << y << " " << xBut << " " << yBut  << " " << att << endl;	
+}
+
+void Base::ecritureTransp(shared_ptr<RobotTransport>& transporteur, ofstream& sortie) {
+	
+	double id = transporteur -> getId();
+	double distance = transporteur -> getDp();
+	double x = (transporteur -> getPosition()).x;
+	double y = (transporteur -> getPosition()).y;
+	double xBut = (transporteur -> getBut()).x;
+	double yBut = (transporteur -> getBut()).y;
+	bool att = transporteur -> getAtteint();
+	bool ret = transporteur -> getRetour();
+	sortie << "				" << "# Transporteurs" << endl;
+	sortie << " 			" << id << " " << distance << " " << x << " " 
+		   << y << " " << xBut << " " << yBut  << " " << att << " " << ret << endl;	
+}
+
+void Base::ecritureComm(shared_ptr<RobotCommunication>& communicateur, 
+						ofstream& sortie) {
+	double id = communicateur -> getId();
+	double distance = communicateur -> getDp();
+	double x = (communicateur -> getPosition()).x;
+	double y = (communicateur -> getPosition()).y;
+	double xBut = (communicateur -> getBut()).x;
+	double yBut = (communicateur -> getBut()).y;
+	bool att = communicateur -> getAtteint();
+	sortie << "				" << "# Communicateurs" << endl;
+	sortie << " 			" << id << " " << distance << " " << x << " " 
+		   << y << " " << xBut << " " << yBut  << " " << att << endl;	
+}
 
 //---------------------------Creation + Tâche de mise à jour---------------------------
 
