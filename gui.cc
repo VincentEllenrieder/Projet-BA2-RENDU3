@@ -4,8 +4,16 @@
 #include <cairomm/context.h>
 #include <gtkmm/window.h>
 #include "gui.h"
+#include "graphic.h"
+#include "simulation.h"
+#include "base.h"
 
 using namespace std;
+
+namespace {
+	constexpr unsigned max_tab(10);
+	static std::vector<SimData> report(max_tab); // init with zeros
+}
 
 static Simulation sim;
 static bool link(true);
@@ -76,19 +84,28 @@ MyEvent::MyEvent()
 	m_Box_Gauche(Gtk::ORIENTATION_VERTICAL, 10),
 	m_Box_Droite(Gtk::ORIENTATION_HORIZONTAL, 10),
 	m_Box_Bottom(Gtk::ORIENTATION_HORIZONTAL, 10),
+	m_vbox(Gtk::ORIENTATION_VERTICAL, 10),
 	m_Label_General("General"), m_Button_Exit("exit"), m_Button_File("open file"), 
 	m_Button_Save("save file"),m_Button_Start("start"), m_Button_Step("step"), 
 	m_Label_Toggle("toggle display"), m_Button_Link("toggle link"),m_Button_Range("toggle range"), 
-	m_Label_Info("Init"), start(true), step(false)
+	m_Label_Info("Init"), m_Button_Scroll("Add one more"), count(0), start(true), step(false)
 {
 	set_title("Further");
 	set_border_width(5); //distance entre bord intérieur et extérieur de la fenêtre
 	
+	m_Button_Scroll.signal_clicked().connect(sigc::mem_fun(*this,
+												&Scroll::on_button_clicked_scroll));
+	
 	// Add outer box to the window
 	add(m_Box);
+	
+	m_Vbox.add(m_Button_Scroll);
+	m_Vbox.add(scrolled_window);
+	
 	m_Box.pack_start(m_Box_Top);
-	m_Box_Top.pack_start(m_Box_Gauche);
+	m_Box_Top.pack_start(m_Box_Gauche,false, false);
 	m_Box_Top.pack_start(m_Box_Droite);
+	m_Box_Bottom.pack_start(m_Vbox);
 	m_Box.pack_start(m_Box_Bottom,false,false);
 	m_Area.set_size_request(180,180);
 	m_Box_Droite.pack_start(m_Area);
@@ -117,7 +134,27 @@ MyEvent::MyEvent()
 	Glib::signal_idle().connect( sigc::mem_fun(*this, &MyEvent::on_idle) );
 	
 	add_events(Gdk::KEY_RELEASE_MASK);
+	
+	scrolled_window.set_size_request(500, 200);  // replace 500 by -1 for the project
+	scrolled_window.add(tree_view);
 
+	scrolled_window.set_policy(Gtk::PolicyType::POLICY_AUTOMATIC,
+							  Gtk::PolicyType::POLICY_AUTOMATIC);
+	scrolled_window.set_hexpand();
+
+	tree_view.append_column("nbP", _columns._col_nbP);
+	tree_view.append_column("nbF", _columns._col_nbF);
+	tree_view.append_column("nbT", _columns._col_nbT);
+	tree_view.append_column("nbC", _columns._col_nbC);
+	tree_view.append_column_numeric("Amount resource", _columns._col_resource, "%.2f");
+
+	auto cell = Gtk::make_managed<Gtk::CellRendererProgress>();
+	int cols_count = tree_view.append_column("Mission completeness", *cell);
+
+	auto progress_col = tree_view.get_column(cols_count - 1);
+	if(progress_col) progress_col->add_attribute(cell->property_value(),
+													_columns._col_resource_percentage);
+													
 	show_all_children();	
 }
 
@@ -128,23 +165,22 @@ void MyEvent::on_button_clicked_exit() {
 	exit(0);
 }
 
-void MyEvent::on_button_clicked_start(Simulation goSimulation){
+void MyEvent::on_button_clicked_start(){
 	start=not(start);
 	if (start==true) {
-		m_Button_Start.set_label("Start");
+		m_Button_Start.set_label("stop");
 		cout << "La simulation est arretée" << endl;
-		MyEvent::on_idle(goSimulation);
-		m_Area.clear();
+		Glib::signal_idle().connect( sigc::mem_fun(*this, &MyEvent::on_idle) );
 	}
 	else {
-		m_Button_Start.set_label("Stop");
+		m_Button_Start.set_label("start");
 		cout<<"La simulation reprend" << endl;
 	}	
 }
 void MyEvent::on_button_clicked_step(){
 	cout << "Step" << endl;
 	if (start==true) {
-		MyEvent::on_idle();
+		on_idle();
 		m_Area.draw();
 	}
 }
@@ -242,12 +278,47 @@ bool MyEvent::on_key_press_event(GdkEventKey * key_event){
 bool MyEvent::on_idle(){
 	static unsigned count(0);
 	if(start){
-		execute(bool oui);
+		sim.executeSimulation();
 		cout << "Mise à jour de la simulation numéro : " << ++count << endl;
+		m_Area.clear();
 	}
 	else if (step){
 		step = false;
 		cout << "Mise à jour de la simulation numéro : " << ++count << endl;
 	}
 	return true;  // return false when done
+}
+void MyEvent::on_button_clicked_scroll()
+{
+  tree_view_update(); 
+}
+
+void MyEvent::tree_view_update()
+{
+  Glib::RefPtr<Gtk::ListStore> ref_tree_model = Gtk::ListStore::create(_columns);
+  tree_view.set_model(ref_tree_model);
+
+  if(true)
+  {
+	if(count > report.size()) 
+		std::cout << max_tab << " lines max are displayed" << std::endl;
+
+	for(size_t i = 0 ; i < count and i <report.size() ; ++i)
+	{
+	  report[i].nbP = i;
+	  report[i].nbF = i;
+	  report[i].nbT = i;
+	  report[i].nbC = i;
+	  report[i].ressource = 1000*i;
+	  report[i].ressource_p = 10*i;
+		
+	  auto row = *(ref_tree_model->append());
+	  row[_columns._col_nbP] = report[i].nbP;
+	  row[_columns._col_nbF] = report[i].nbF;
+	  row[_columns._col_nbT] = report[i].nbT;
+      row[_columns._col_nbC] = report[i].nbC;
+	  row[_columns._col_resource] = report[i].ressource;
+	  row[_columns._col_resource_percentage] = report[i].ressource_p;
+	}
+  }
 }
