@@ -743,6 +743,8 @@ void Base::addProsp(int newId, double dist, double x, double y, double xb,
 	
 	robotsProsp.push_back(newPtr);
 	robots.push_back(newPtr);
+	CercleR cercle(x, -y, getCouleur());
+	cercle.dessinRobot(getCouleur());
 }
 
 void Base::addProsp(int newId, double dist, double x, double y, double xb, 
@@ -763,6 +765,8 @@ void Base::addProsp(int newId, double dist, double x, double y, double xb,
 	}
 	robots.push_back(newPtr);
 	robotsProsp.push_back(newPtr);
+	CercleR cercle(x, -y, getCouleur());
+	cercle.dessinRobot(getCouleur());
 }
 			
 void Base::addForage(int newId, double dist, double x, double y, double xb, double yb, 
@@ -781,6 +785,8 @@ void Base::addForage(int newId, double dist, double x, double y, double xb, doub
 	}
 	robots.push_back(newPtr);
 	robotsForage.push_back(newPtr);
+	CercleR cercle(x, -y, getCouleur());
+	cercle.dessinRobot(getCouleur());
 }
 				   			  
 void Base::addTransp(int newId, double dist, double x, double y, double xb, double yb, 
@@ -799,6 +805,8 @@ void Base::addTransp(int newId, double dist, double x, double y, double xb, doub
 	}
 	robots.push_back(newPtr);
 	robotsTransp.push_back(newPtr);
+	CercleR cercle(x, -y, getCouleur());
+	cercle.dessinRobot(getCouleur());
 }
 				   			  
 void Base::addComm(int newId, double dist, double x, double y, double xb, double yb, 
@@ -817,6 +825,8 @@ void Base::addComm(int newId, double dist, double x, double y, double xb, double
 	}
 	robots.push_back(newPtr);
 	robotsComm.push_back(newPtr);
+	CercleR cercle(x, -y, getCouleur());
+	cercle.dessinRobot(getCouleur());
 	if ((x == centreBase.x) and (y == centreBase.y)) Base::setCommAtCenter(true);
 }
 	

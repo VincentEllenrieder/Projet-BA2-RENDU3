@@ -1,40 +1,43 @@
-# Definitions de macros
+OUT = projet
+CXX = g++
+CXXFLAGS = -Wall -std=c++11 
+LINKING = `pkg-config --cflags gtkmm-3.0`
+LDLIBS = `pkg-config --libs gtkmm-3.0`
+OFILES = gui.o graphic.o projet.o simulation.o base.o message.o geomod.o gisement.o robot.o
 
-CXX     = g++
-CXXFLAGS = -g -Wall -std=c++11
-CXXFILES = projet.cc simulation.cc base.cc gisement.cc message.cc geomod.cc
-OFILES = projet.o simulation.o base.o gisement.o message.o geomod.o
-#remplacer la ligne 6 par la ligne 8 en cas de disfonctionnement
-#OFILES = $(CXXFILES:.cc=.o)
+all: $(OUT) 
 
-# Definition de la premiere regle
+projet.o: projet.cc gui.h simulation.h 
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+		
+gui.o: gui.cc gui.h graphic.h simulation.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+simulation.o: simulation.cc simulation.h gisement.h base.h message.h geomod.h constantes.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+		
+gisement.o: gisement.cc gisement.h geomod.h constantes.h message.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+base.o: base.cc base.h gisement.h robot.h geomod.h message.h constantes.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+robot.o: robot.cc robot.h gisement.h geomod.h constantes.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+message.o: message.cc message.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+geomod.o: geomod.cc geomod.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+graphic.o: graphic.cc graphic.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 
-projet: $(OFILES)
-	$(CXX) $(OFILES) -o projet
-
-# Definitions de cibles particulieres
-
-depend:
-	@echo " *** MISE A JOUR DES DEPENDANCES ***"
-	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
-	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
-	  egrep -v "/usr/include" \
-	 ) >Makefile.new
-	@mv Makefile.new Makefile
+	
+$(OUT): $(OFILES)
+	$(CXX) $(CXXFLAGS) $(LINKING) $(OFILES) -o $@ $(LDLIBS)
 
 clean:
-	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
-	@/bin/rm -f *.o *.x *.cc~ *.h~ projet
-
-#
-# -- Regles de dependances generees automatiquement
-#
-# DO NOT DELETE THIS LINE
-projet.o: projet.cc simulation.h gisement.h geomod.h constantes.h \
- message.h base.h robot.h
-simulation.o: simulation.cc simulation.h gisement.h geomod.h constantes.h \
- message.h base.h robot.h
-base.o: base.cc base.h geomod.h constantes.h message.h gisement.h robot.h
-gisement.o: gisement.cc gisement.h geomod.h constantes.h message.h
-message.o: message.cc message.h
-geomod.o: geomod.cc geomod.h constantes.h
+	@echo "Cleaning compilation files"
+	@rm *.o $(OUT) *.cc~ *.h~

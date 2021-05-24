@@ -33,6 +33,7 @@ public:
 	void gisementIntersectGisement(Gisement& g) const;
 	
 	void lostRessources();
+	
 };
 
 namespace gisement {

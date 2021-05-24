@@ -18,27 +18,28 @@ namespace {
 					  R_TRANSP, R_COMM};
 }
 
+//--------------------------------------boucle---------------------------------------
+
 void Simulation::executeSimulation() {
-	for (int i(0); i >= 0; ++i) {
-		
-		for (size_t k(0); k < bases.size(); ++k) {
-			bool autonome = bases[k].arret();
-			if (autonome == false) {
-				for (size_t l(0); l < bases.size(); ++l) {
-					bases[k].updateAdjacence(bases[k].getRobots(),
-											 bases[l].getRobots());
-				}
-				bases[k].connexion();
-				bases[k].maintenance();
-				bases[k].creation();
-				bases[k].updateRemote();
-				bases[k].updateAutonomous();
-				bases[k].updateMoney();
-				if (bases[k].destroyBase() == true) bases[k].~Base();
+	for (size_t k(0); k < bases.size(); ++k) {
+		bool autonome = bases[k].arret();
+		if (autonome == false) {
+			for (size_t l(0); l < bases.size(); ++l) {
+				bases[k].updateAdjacence(bases[k].getRobots(),
+										 bases[l].getRobots());
 			}
+			bases[k].connexion();
+			bases[k].maintenance();
+			bases[k].creation();
+			bases[k].updateRemote();
+			bases[k].updateAutonomous();
+			bases[k].updateMoney();
+			if (bases[k].destroyBase() == true) bases[k].~Base();
 		}
 	}
 }
+
+//--------------------------------------------lecture----------------------------------
 
 void Simulation::lecture(char* nomFichier){
     string line;
@@ -47,9 +48,9 @@ void Simulation::lecture(char* nomFichier){
     if(!fichier.fail()) {
         while(getline(fichier >> ws,line)) {
 			if(line[0]=='#') continue;  
-			Simulation::decodageLigne(line, fichier);
+			decodageLigne(line, fichier);
         }
-		Simulation::commAtCenterBase();
+		commAtCenterBase();
 		simulation::successfullRead(fichier);
 	}
 	else end(fichier);
@@ -69,7 +70,7 @@ void Simulation::decodageLigne(string line, ifstream& fichier) {
 		case GISEMENTS:
 			if(!(data >> x >> y >> r >> cap)) end(fichier);
 			else ++i;
-			Simulation::addGisement(x, y, r, cap);
+			addGisement(x, y, r, cap);
 			simulation::etatApresGisement(fichier);
 			break;
 
@@ -83,7 +84,7 @@ void Simulation::decodageLigne(string line, ifstream& fichier) {
 			if(!(data >> x >> y >> ressource >> nbP >> nbF >> nbT >> nbC)) {
 				end(fichier);
 			} else ++i;
-			Simulation::addBase(x, y, ressource);
+			addBase(x, y, ressource);
 			simulation::etatApresBase(fichier);
 			break;
 			
@@ -136,7 +137,6 @@ void Simulation::decodageLigne(string line, ifstream& fichier) {
 	}
 }
 
-
 void Simulation::addBase(double x, double y, double ressource) {				 
 	Point c = geomod::setPoint(x, y);
 	Base newBase(c, ressource);
@@ -151,6 +151,9 @@ void Simulation::addBase(double x, double y, double ressource) {
 		}
 	newBase.intersectGisement();
 	}
+	newBase.setCouleur(bases.size()%6);
+	CercleB cercle(x, -y, rayon_base, newBase.getCouleur());
+	cercle.dessinBase(newBase.getCouleur());
 	bases.push_back(newBase);
 }
 
@@ -158,8 +161,9 @@ void Simulation::addGisement(double x, double y, double r, double cap) {
 	Point c = geomod::setPoint(x, y);
 	Gisement newGisement(c, r, cap);
 	newGisement.gisementIntersectGisement(newGisement);
+	CercleG cercle(x, -y, r);
+	cercle.dessinGisement();
 }
-
 
 void Simulation::commAtCenterBase() {
 	for(size_t i(0); i < bases.size(); ++i) {
@@ -170,6 +174,8 @@ void Simulation::commAtCenterBase() {
 		}
 	}
 }
+
+//----------------------------------------ecriture---------------------------------
 
 void Simulation::ecriture(ofstream& sortie) {
 		
@@ -194,6 +200,8 @@ void Simulation::ecriture(ofstream& sortie) {
 	}
 }
 
+//--------------------------------------------autres-----------------------------------
+
 void Simulation::end(ifstream& fichier) {
 	fichier.close();
 	destroyData();
@@ -205,6 +213,24 @@ void Simulation::destroyData() {
 		bases[i].destroyRobots();
 	}
 	bases.clear();
+}
+
+void Simulation::drawConnexionRange(bool range, bool link) {
+	for (size_t i(0); i < bases.size(); ++i) {
+		vector<shared_ptr<Robot>> robots = bases[i].getRobots();
+		for (size_t j(0); j < robots.size(); ++j) {
+			geomod::range((robots[j] -> getPosition()).x, 
+						  (robots[j] -> getPosition()).y, rayon_com, range);
+			vector<shared_ptr<Robot>> voisins = robots.getAdjacence();
+			for (size_t k(0); k<voisins.size(); ++k) {
+				double x1=(robots[j]->getPosition()).x;
+				double y1=(robots[j]->getPosition()).y;
+				double x2=(voisins[k]->getPosition()).x;
+				double y2=(voisins[k]->getPosition()).y;
+				if (link) geomod::link(x1, y1, x2, y2, link);
+			}
+		}
+	}	
 }
 
 void simulation::setWolrd() {
@@ -319,5 +345,3 @@ bool simulation::convertStringToBool(string& str) {
 	if (str == "true") return true;
 	else return false;
 }
-
-

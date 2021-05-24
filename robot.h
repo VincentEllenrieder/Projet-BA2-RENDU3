@@ -4,8 +4,8 @@
 #include <memory>
 #include <cmath>
 #include "gisement.h"
-#include "constantes.h"
 #include "geomod.h"
+#include "constantes.h"
 
 #ifndef ROBOT_H
 #define ROBOT_H

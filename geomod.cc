@@ -113,3 +113,57 @@ bool geomod::intersection(Point a, Point b, double r1, double r2){
 		return false;
 	}
 }
+
+void geomod::rebouclementBase(double x, double y, double rayon, int couleur) {
+	maxi = geomod::getMax();
+	graphic::drawBase(x, y, rayon, couleur);
+	graphic::drawBase(x - maxi, y, rayon, couleur);
+	graphic::drawBase(x + maxi, y, rayon, couleur);
+	graphic::drawBase(x, y-maxi, rayon, couleur);
+	graphic::drawBase(x, y+maxi, rayon, couleur);
+	graphic::drawBase(x-maxi, y-maxi, rayon, couleur);
+	graphic::drawBase(x-maxi, y+maxi, rayon, couleur);
+	graphic::drawBase(x+maxi, y-maxi, rayon, couleur);
+	graphic::drawBase(x+maxi,y+maxi, rayon, couleur);
+}
+
+void geomod::rebouclementGisement(double x, double y, double rayon) {
+	maxi = geomod::getMax();
+	graphic::drawGisement(x, y, rayon);
+	graphic::drawGisement(x-maxi, y, rayon);
+	graphic::drawGisement(x+maxi, y, rayon);
+	graphic::drawGisement(x, y-maxi, rayon);
+	graphic::drawGisement(x, y+maxi, rayon);
+	graphic::drawGisement(x-maxi, y-maxi, rayon);
+	graphic::drawGisement(x-maxi, y+maxi, rayon);
+	graphic::drawGisement(x+maxi, y-maxi, rayon);
+	graphic::drawGisement(x+maxi,y+maxi, rayon);
+}
+
+void geomod::range(double c1, double c2, double rayon, bool range) {
+	if (range) graphic::drawRange(c1, c2, rayon);
+}
+
+void geomod::link(double c1, double c2, double c3, double c4, bool link) {
+	if (link) graphic::drawLink(c1, c2, c3, c4);
+}
+
+void CercleG::dessinGisement() {
+	rebouclementGisement(getCentreX(), getCentreY(), rayon);
+}
+
+void CercleB::dessinBase(int couleur) {
+	rebouclementBase(getCentreX(), 
+					 getCentreY(), rayon, couleur);
+}
+
+void CercleR::dessinRobot(int couleur) {
+	graphic::drawRobot(getCentreX(), getCentreY(), couleur);
+}
+	
+	
+	
+	
+	
+	
+	

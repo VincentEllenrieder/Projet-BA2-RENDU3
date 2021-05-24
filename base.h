@@ -3,11 +3,11 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+#include "robot.h"
+#include "gisement.h"
+#include "message.h"
 #include "geomod.h"
 #include "constantes.h"
-#include "message.h"
-#include "gisement.h"
-#include "robot.h"
 
 #ifndef BASE_H
 #define BASE_H
@@ -20,6 +20,7 @@ private:
 	double rayonBase;
 	double ressourceBase;
 	bool commAtCenter;
+	int couleur;
 	vector<shared_ptr<Robot>> robots;
 	vector<shared_ptr<RobotProspection>> robotsProsp;
 	vector<shared_ptr<RobotForage>> robotsForage;
@@ -41,6 +42,10 @@ public:
 	void setRessources(double ressources) {ressourceBase = ressources;}
 	
 	void setCommAtCenter(bool update) {commAtCenter = update;}
+	
+	int getCouleur() const {return couleur;}
+	
+	void setCouleur(int i) {couleur = i;}
 	
 	//---------------------------------Base-------------------------------------------
 	

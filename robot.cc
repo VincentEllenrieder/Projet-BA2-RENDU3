@@ -62,8 +62,6 @@ void Robot::reached() {
 	if (pointReached == true) atteint = true;
 }
 
-	
-
 //---------------------------Robots Prospection---------------------------------------
 
 void RobotProspection::updateProspRemote(bool findNew, Point newBut, bool back, 

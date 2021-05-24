@@ -16,9 +16,11 @@ private:
 	
 public:
 
+//--------------------------------------boucle---------------------------------------
+
 	void executeSimulation();
 	
-	void ecriture(ofstream& sortie);
+//--------------------------------------------lecture----------------------------------
 	
 	void lecture(char* nomFichier);
 	
@@ -30,9 +32,17 @@ public:
 	
 	void commAtCenterBase();
 	
+//----------------------------------------ecriture---------------------------------
+
+	void ecriture(ofstream& sortie);
+
+//--------------------------------------------autres-----------------------------------
+	
 	void end(ifstream& fichier);
 	
 	void destroyData();
+	
+	void drawConnexionRange(bool affiche, bool link);
 };
 
 namespace simulation{

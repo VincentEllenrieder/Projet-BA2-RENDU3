@@ -36,4 +36,3 @@ vector<Gisement> gisement::getGisements() {
 void gisement::destroyGisements() {
 	gisements.clear();
 }
-
