@@ -25,6 +25,10 @@ void Gisement::gisementIntersectGisement(Gisement& g) const {
 	gisements.push_back(g);
 }
 
+void Gisement::lostRessources() {
+	capaciteGisement -= deltaR;
+}
+
 vector<Gisement> gisement::getGisements() {
 	return gisements;
 }

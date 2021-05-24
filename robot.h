@@ -142,9 +142,7 @@ public:
 	
 	void setRetour(bool a) {retour = a;}
 	
-	void updateTranspRemote(bool proceed, Point base, Point newBut);
-	
-	void updateTranspAuto(Point base);
+	void updateTransp(bool proceed, Point base, Point newBut);
 	
 	void updateGisement();
 };

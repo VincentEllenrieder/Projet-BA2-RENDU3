@@ -165,16 +165,27 @@ void Base::ecritureComm(shared_ptr<RobotCommunication>& communicateur,
 		   << y << " " << xBut << " " << yBut  << " " << att << endl;	
 }
 
-//---------------------------Creation + Tâche de mise à jour---------------------------
+//---------------------------Creation + mise à jour---------------------------------
 
 void Base::maintenance() {
-	for (size_t i(0); i < robots.size(); ++i) {
-		double dist = robots[i] -> getDp();
-		Point pos = robots[i] -> getPosition();
-		if ((geomod::belong(centreBase, pos, rayonBase)) == true) {
+	for (size_t i(0); i < robotsProsp.size(); ++i) {
+		double dist = robotsProsp[i] -> getDp();
+		Point pos = robotsProsp[i] -> getPosition();
+		bool ret = robotsProsp[i] -> getRetour();
+		if ((centreBase.x == pos.x) and (centreBase.y == pos.y) and (ret == true)) {
 			double c = cout_reparation * dist;
 			ressourceBase -= c;
-			robots[i] -> setDp(0);
+			robotsProsp[i] -> setDp(0);
+		}
+	}
+	for (size_t i(0); i < robotsTransp.size(); ++i) {
+		double dist = robotsTransp[i] -> getDp();
+		Point pos = robotsTransp[i] -> getPosition();
+		bool ret = robotsTransp[i] -> getRetour();
+		if ((centreBase.x == pos.x) and (centreBase.y == pos.y) and (ret == true)) {
+			double c = cout_reparation * dist;
+			ressourceBase -= c;
+			robotsTransp[i] -> setDp(0);
 		}
 	}
 }	
@@ -219,13 +230,12 @@ void Base::updateRemote() {
 		robotsForage[i] -> updateForage();
 	}
 	for (size_t i(0); i < robotsTransp.size(); ++i) {
-		if (robotsTransp[i] -> getRemote() == true) {
 			double bx = (robotsTransp[i] -> getBut()).x;
 			double by = (robotsTransp[i] -> getBut()).y;
 			bool proceed = loadingAccepted(bx, by);
-			Point newBut = newGoal();
-			robotsTransp[i] -> updateTranspRemote(proceed, centreBase, newBut);
-		}
+			Point newBut = newGoal();//nouveau but donné seulement s'il est à sa base
+			robotsTransp[i] -> updateTransp(proceed,	//et y sera donc de toute 
+											centreBase, newBut); //façon en remote
 	}
 	for (size_t i(0); i < robotsComm.size(); ++i) {
 		robotsComm[i] -> updateComm();
@@ -236,11 +246,6 @@ void Base::updateAutonomous() {
 	for (size_t i(0); i < robotsProsp.size(); ++i) {
 		if (robotsProsp[i] -> getRemote() == false) {
 			robotsProsp[i] -> updateProspAuto(centreBase);
-		}
-	}
-	for (size_t i(0); i < robotsTransp.size(); ++i) {
-		if (robotsTransp[i] -> getRemote() == false) {
-			robotsTransp[i] -> updateTranspAuto(centreBase);
 		}
 	}
 }
@@ -419,6 +424,7 @@ void Base::creationForageTransport() {
 			foundGisements.push_back(decouvert);
 		}
 	}
+	if (foundGisements.size() == 0) return;
 	bestForage(foundGisements);
 }	
 

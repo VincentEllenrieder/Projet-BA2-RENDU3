@@ -147,7 +147,7 @@ void RobotForage::updateForage() {
 
 //---------------------------Robots Transport----------------------------------------
 
-void RobotTransport::updateTranspRemote(bool proceed, Point base,
+void RobotTransport::updateTransp(bool proceed, Point base,
 										Point newBut) {
 	if ((atteint == false) and (dp != maxDTransp)) { //avance
 		dp += deltaD;
@@ -171,26 +171,12 @@ void RobotTransport::updateTranspRemote(bool proceed, Point base,
 void RobotTransport::updateGisement() {
 	vector<Gisement> gisements = gisement::getGisements();
 	for (size_t i(0); i < gisements.size(); ++i) {
-		double ress = gisements[i].getRessource();
 		double gx = gisements[i].getCentreGisement().x;
 		double gy = gisements[i].getCentreGisement().y;
 		if((gx == but.x) and (gy == but.y)) {
-			ress -= deltaR;
-			gisements[i].setRessource(ress);
+			gisements[i].lostRessources();
 			break;
 		}
-	}
-}
-
-void RobotTransport::updateTranspAuto(Point base) {
-	if ((atteint == false) and (dp != maxDTransp)) {
-		dp += deltaD;
-		updatePosition();
-		reached();
-	}
-	if (atteint == true) {
-		retour = true;
-		but = base;
 	}
 }
 
